@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>화니와 함께, 매일 중국어 한 스푼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F3ECDD;
+    --paper-dark: #E9DFC7;
+    --ink: #2A2521;
+    --ink-soft: #5B5148;
+    --seal: #B5342B;
+    --seal-dark: #8E271F;
+    --gold: #A9823D;
+    --jade: #46766A;
+    --jade-soft: #DCE7E1;
+    --bubble-a: #FBF7EC;
+    --bubble-b: #E9F1EE;
+    --line: rgba(42,37,33,0.14);
+    --card-shadow: 0 18px 40px -18px rgba(42,37,33,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(181,52,43,0.05), transparent 40%),
+      radial-gradient(circle at 92% 85%, rgba(70,118,106,0.06), transparent 45%),
+      var(--paper);
+    background-attachment: fixed;
+    font-family:'Noto Sans KR', sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .wrap{ max-width:720px; margin:0 auto; padding:28px 20px 60px; }
+
+  /* ===== Header ===== */
+  header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+    padding-bottom:20px; border-bottom:1px solid var(--line); margin-bottom:22px;
+  }
+  .brand{ display:flex; align-items:center; gap:14px; }
+  .brand-seal{
+    width:52px;height:52px;flex:none; border-radius:8px; background:var(--seal); color:#F3ECDD;
+    display:flex;align-items:center;justify-content:center; font-family:'Noto Serif SC',serif;
+    font-size:26px;font-weight:700;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.18), 0 8px 18px -8px rgba(142,39,31,0.7);
+    transform:rotate(-3deg);
+  }
+  .brand h1{ font-family:'Noto Serif SC', serif; font-size:22px; margin:0 0 2px; letter-spacing:0.2px; }
+  .brand p{ margin:0; font-size:12.5px; color:var(--ink-soft); }
+  .streak-badge{ text-align:right; flex:none; }
+  .streak-num{ font-family:'Noto Serif SC', serif; font-size:26px; font-weight:700; color:var(--seal); line-height:1; }
+  .streak-label{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+
+  /* ===== Day rail ===== */
+  .rail-title{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px 2px; display:flex; align-items:center; gap:6px; }
+  .rail{ display:flex; gap:9px; overflow-x:auto; padding:4px 2px 14px; margin-bottom:6px; }
+  .rail::-webkit-scrollbar{height:5px;}
+  .rail::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+  .day-chip{
+    position:relative; flex:none; width:52px;height:56px; border-radius:10px;
+    border:1.5px solid var(--line); background:#fff8ea;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer; font-family:'Noto Serif SC',serif; color:var(--ink-soft);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .day-chip .num{font-size:15px;font-weight:700;}
+  .day-chip .tag{font-size:8px;letter-spacing:0.5px;margin-top:1px;color:var(--ink-soft);}
+  .day-chip.locked{opacity:0.42;cursor:not-allowed;}
+  .day-chip.active{ border-color:var(--seal); box-shadow:0 0 0 3px rgba(181,52,43,0.12); transform:translateY(-2px); }
+  .day-chip.done{background:var(--jade-soft); border-color:var(--jade);}
+  .day-chip.done .num,.day-chip.done .tag{color:var(--jade);}
+  .seal-mark{
+    position:absolute; top:-8px;right:-8px; width:22px;height:22px; border-radius:6px; background:var(--seal); color:#fff;
+    display:flex;align-items:center;justify-content:center; font-size:10.5px; font-family:'Noto Serif SC',serif;
+    transform:rotate(-8deg); box-shadow:0 4px 8px -3px rgba(142,39,31,0.6);
+  }
+
+  /* ===== Card ===== */
+  .stage{ margin:18px 0 16px; }
+  .card{
+    position:relative; min-height:300px; border-radius:18px; background:#FBF7EC; border:1px solid var(--line);
+    box-shadow:var(--card-shadow); cursor:pointer; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:34px 28px; text-align:center;
+    animation: cardIn .22s ease;
+  }
+  @keyframes cardIn{ from{ opacity:0; transform:scale(0.97); } to{ opacity:1; transform:scale(1); } }
+  .word-count{ position:absolute; top:16px; left:18px; font-size:11px; color:var(--ink-soft); letter-spacing:0.5px; }
+  .hint{ position:absolute; bottom:16px; right:18px; font-size:10.5px; color:var(--ink-soft); opacity:0.7; }
+  .hanzi{ font-family:'Noto Serif SC',serif; font-weight:700; font-size:64px; line-height:1.05; color:var(--ink); }
+  .pinyin-lg{ font-family:'Noto Sans SC', sans-serif; font-size:19px; color:var(--seal); margin-top:10px; letter-spacing:0.5px; }
+  .meaning-lg{ font-size:22px; font-weight:700; color:var(--jade); margin-bottom:14px; }
+  .example-box{ border-top:1px dashed var(--line); padding-top:14px; margin-top:6px; width:100%; }
+  .example-cn{ font-family:'Noto Serif SC',serif; font-size:18px; margin-bottom:5px;}
+  .example-py{ font-size:13px; color:var(--ink-soft); margin-bottom:5px;}
+  .example-kr{ font-size:13.5px; color:var(--ink-soft);}
+
+  /* ===== sound button ===== */
+  .sound-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%; border:1.5px solid var(--seal);
+    background:#fff; color:var(--seal); cursor:pointer; font-size:15px; flex:none;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .sound-btn:hover{ background:var(--seal); color:#fff; }
+  .sound-btn:active{ transform:scale(0.92); }
+  .sound-btn.small{ width:26px; height:26px; font-size:12px; }
+  .hanzi-row{ display:flex; align-items:center; justify-content:center; gap:10px; }
+  .example-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .bubble-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
+
+  .dots{ display:flex; justify-content:center; gap:6px; margin-bottom:18px; }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--line);}
+  .dot.on{background:var(--seal);}
+  .controls{ display:flex; gap:10px; }
+  .btn{
+    flex:1; padding:13px 14px; border-radius:11px; border:1.5px solid var(--ink); background:var(--ink);
+    color:var(--paper); font-size:14.5px; font-weight:700; cursor:pointer; font-family:'Noto Sans KR',sans-serif;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  .btn.ghost{ background:transparent; color:var(--ink); }
+  .btn.seal{ background:var(--seal); border-color:var(--seal); color:#fff;}
+  .btn.jade{ background:var(--jade); border-color:var(--jade); color:#fff;}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .btn:active:not(:disabled){transform:scale(0.98);}
+
+  /* ===== dialogue ===== */
+  .dlg-wrap{
+    background:#FBF7EC; border:1px solid var(--line); border-radius:18px; padding:22px 18px;
+    box-shadow:var(--card-shadow); margin-bottom:16px;
+  }
+  .dlg-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .dlg-title{ font-size:12.5px; color:var(--ink-soft); }
+  .toggle-btn{
+    font-size:11.5px; border:1px solid var(--line); background:#fff; padding:6px 10px; border-radius:20px;
+    cursor:pointer; color:var(--ink-soft);
+  }
+  .toggle-btn.on{ background:var(--jade); border-color:var(--jade); color:#fff; }
+  .bubble-row{ display:flex; margin-bottom:12px; }
+  .bubble-row.b{ justify-content:flex-end; }
+  .bubble{
+    max-width:82%; padding:12px 14px; border-radius:14px; background:var(--bubble-a); border:1px solid var(--line);
+  }
+  .bubble-row.b .bubble{ background:var(--bubble-b); }
+  .speaker{ font-size:10px; color:var(--gold); font-weight:700; margin-bottom:4px; letter-spacing:0.5px; }
+  .bubble .cn{ font-family:'Noto Serif SC',serif; font-size:17px; margin-bottom:4px; }
+  .bubble .py{ font-size:12.5px; color:var(--seal); margin-bottom:3px; }
+  .bubble .kr{ font-size:12.5px; color:var(--ink-soft); }
+  .bubble .kr.hidden, .bubble .py.hidden{ display:none; }
+
+  /* ===== quiz ===== */
+  .quiz-progress{ font-size:12px; color:var(--ink-soft); margin-bottom:10px; text-align:center; }
+  .q-card{
+    background:#FBF7EC; border:1px solid var(--line); border-radius:18px; padding:32px 26px;
+    box-shadow:var(--card-shadow); text-align:center; margin-bottom:16px;
+  }
+  .q-hanzi{ font-family:'Noto Serif SC',serif; font-weight:700; font-size:46px; }
+  .q-pinyin{ color:var(--seal); font-size:15px; margin-top:6px;}
+  .q-prompt{ font-size:12px; color:var(--ink-soft); margin-top:14px; letter-spacing:0.5px;}
+  .options{ display:grid; gap:10px; }
+  .opt{
+    padding:14px 16px; border-radius:11px; border:1.5px solid var(--line); background:#fff; text-align:left;
+    font-size:15px; cursor:pointer; transition: border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--gold);}
+  .opt.correct{ background:var(--jade-soft); border-color:var(--jade); color:var(--jade); font-weight:700;}
+  .opt.wrong{ background:#F6DEDA; border-color:var(--seal); color:var(--seal-dark); font-weight:700;}
+  .opt.disabled{ pointer-events:none; }
+
+  .result-card{
+    text-align:center; padding:40px 24px; background:#FBF7EC; border-radius:18px; border:1px solid var(--line);
+    box-shadow:var(--card-shadow);
+  }
+  .result-score{ font-family:'Noto Serif SC',serif; font-size:52px; color:var(--seal); font-weight:900;}
+  .result-sub{ color:var(--ink-soft); font-size:13.5px; margin:8px 0 22px;}
+
+  .section-label{ font-size:12.5px; color:var(--ink-soft); margin:22px 0 8px 2px; }
+  footer{ text-align:center; font-size:11px; color:var(--ink-soft); margin-top:30px; opacity:0.7;}
+  @media (max-width:420px){ .hanzi{font-size:52px;} .card{min-height:270px;} }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+// ===================== 데이터: HSK 2~3급 생활 중국어 (20일 x 5단어 + 대화) =====================
+const DAYS = [
+{ title:"인사와 기본 표현 (1)", words:[
+  {h:"你好",p:"nǐ hǎo",m:"안녕하세요",ec:"你好，我是学生。",ep:"Nǐ hǎo, wǒ shì xuéshēng.",ek:"안녕하세요, 저는 학생입니다."},
+  {h:"谢谢",p:"xièxie",m:"감사합니다",ec:"谢谢你的帮助。",ep:"Xièxie nǐ de bāngzhù.",ek:"도와주셔서 감사합니다."},
+  {h:"不客气",p:"bú kèqi",m:"천만에요",ec:"不客气，应该的。",ep:"Bú kèqi, yīnggāi de.",ek:"천만에요, 당연한 거예요."},
+  {h:"再见",p:"zàijiàn",m:"안녕히 가세요",ec:"明天见，再见！",ep:"Míngtiān jiàn, zàijiàn!",ek:"내일 봐요, 안녕!"},
+  {h:"对不起",p:"duìbuqǐ",m:"죄송합니다",ec:"对不起，我迟到了。",ep:"Duìbuqǐ, wǒ chídào le.",ek:"죄송합니다, 늦었어요."}
+], dialogue:[
+  {s:"A",cn:"你好，谢谢你昨天帮我。",py:"Nǐ hǎo, xièxie nǐ zuótiān bāng wǒ.",kr:"안녕하세요, 어제 도와주셔서 감사해요."},
+  {s:"B",cn:"不客气。",py:"Bú kèqi.",kr:"천만에요."},
+  {s:"A",cn:"对不起，我现在要走了。",py:"Duìbuqǐ, wǒ xiànzài yào zǒu le.",kr:"죄송해요, 저 지금 가야 해요."},
+  {s:"B",cn:"好，再见！",py:"Hǎo, zàijiàn!",kr:"네, 안녕히 가세요!"}
+]},
+{ title:"인사와 기본 표현 (2)", words:[
+  {h:"没关系",p:"méi guānxi",m:"괜찮습니다",ec:"没关系，别担心。",ep:"Méi guānxi, bié dānxīn.",ek:"괜찮아요, 걱정하지 마세요."},
+  {h:"请",p:"qǐng",m:"~해 주세요",ec:"请坐。",ep:"Qǐng zuò.",ek:"앉으세요."},
+  {h:"早上好",p:"zǎoshang hǎo",m:"좋은 아침이에요",ec:"早上好，你吃早饭了吗？",ep:"Zǎoshang hǎo, nǐ chī zǎofàn le ma?",ek:"좋은 아침이에요, 아침 드셨어요?"},
+  {h:"晚安",p:"wǎn'ān",m:"안녕히 주무세요",ec:"我要睡觉了，晚安。",ep:"Wǒ yào shuìjiào le, wǎn'ān.",ek:"저 잘게요, 안녕히 주무세요."},
+  {h:"好的",p:"hǎo de",m:"네, 알겠어요",ec:"好的，没问题。",ep:"Hǎo de, méi wèntí.",ek:"네, 문제없어요."}
+], dialogue:[
+  {s:"A",cn:"早上好！昨天真对不起。",py:"Zǎoshang hǎo! Zuótiān zhēn duìbuqǐ.",kr:"좋은 아침이에요! 어제는 정말 죄송했어요."},
+  {s:"B",cn:"没关系，请坐吧。",py:"Méi guānxi, qǐng zuò ba.",kr:"괜찮아요, 앉으세요."},
+  {s:"A",cn:"好的，谢谢。",py:"Hǎo de, xièxie.",kr:"네, 감사합니다."},
+  {s:"B",cn:"我要睡觉了，晚安！",py:"Wǒ yào shuìjiào le, wǎn'ān!",kr:"저 잘게요, 안녕히 주무세요!"}
+]},
+{ title:"가족 (1)", words:[
+  {h:"爸爸",p:"bàba",m:"아빠",ec:"我爸爸是老师。",ep:"Wǒ bàba shì lǎoshī.",ek:"저희 아빠는 선생님입니다."},
+  {h:"妈妈",p:"māma",m:"엄마",ec:"妈妈在厨房做饭。",ep:"Māma zài chúfáng zuòfàn.",ek:"엄마는 부엌에서 요리하고 계세요."},
+  {h:"哥哥",p:"gēge",m:"형/오빠",ec:"我哥哥比我大三岁。",ep:"Wǒ gēge bǐ wǒ dà sān suì.",ek:"우리 형은 저보다 세 살 많아요."},
+  {h:"姐姐",p:"jiějie",m:"누나/언니",ec:"姐姐在北京工作。",ep:"Jiějie zài Běijīng gōngzuò.",ek:"언니는 베이징에서 일해요."},
+  {h:"弟弟",p:"dìdi",m:"남동생",ec:"我弟弟很聪明。",ep:"Wǒ dìdi hěn cōngming.",ek:"제 남동생은 똑똑해요."}
+], dialogue:[
+  {s:"A",cn:"你家有几口人？",py:"Nǐ jiā yǒu jǐ kǒu rén?",kr:"가족이 몇 명이에요?"},
+  {s:"B",cn:"我家有爸爸、妈妈、哥哥和姐姐。",py:"Wǒ jiā yǒu bàba, māma, gēge hé jiějie.",kr:"저희 가족은 아빠, 엄마, 형, 누나가 있어요."},
+  {s:"A",cn:"你有弟弟吗？",py:"Nǐ yǒu dìdi ma?",kr:"남동생 있어요?"},
+  {s:"B",cn:"没有，我是最小的。",py:"Méiyǒu, wǒ shì zuì xiǎo de.",kr:"없어요, 제가 막내예요."}
+]},
+{ title:"가족 (2)", words:[
+  {h:"妹妹",p:"mèimei",m:"여동생",ec:"妹妹喜欢跳舞。",ep:"Mèimei xǐhuan tiàowǔ.",ek:"여동생은 춤추는 것을 좋아해요."},
+  {h:"儿子",p:"érzi",m:"아들",ec:"他的儿子今年五岁。",ep:"Tā de érzi jīnnián wǔ suì.",ek:"그의 아들은 올해 다섯 살이에요."},
+  {h:"女儿",p:"nǚ'ér",m:"딸",ec:"我女儿在上学。",ep:"Wǒ nǚ'ér zài shàngxué.",ek:"제 딸은 학교에 다니고 있어요."},
+  {h:"爱人",p:"àiren",m:"배우자",ec:"这是我爱人。",ep:"Zhè shì wǒ àiren.",ek:"이 사람은 제 배우자입니다."},
+  {h:"家",p:"jiā",m:"집/가족",ec:"我家有四口人。",ep:"Wǒ jiā yǒu sì kǒu rén.",ek:"우리 가족은 네 식구예요."}
+], dialogue:[
+  {s:"A",cn:"这是我爱人，这是我们的女儿。",py:"Zhè shì wǒ àiren, zhè shì wǒmen de nǚ'ér.",kr:"이 사람은 제 배우자이고, 이쪽은 저희 딸이에요."},
+  {s:"B",cn:"你还有儿子吗？",py:"Nǐ hái yǒu érzi ma?",kr:"아들도 있어요?"},
+  {s:"A",cn:"有，还有一个妹妹，我们一家五口。",py:"Yǒu, hái yǒu yí ge mèimei, wǒmen yì jiā wǔ kǒu.",kr:"네, 여동생도 하나 있어요, 저희는 다섯 식구예요."},
+  {s:"B",cn:"你的家人真多！",py:"Nǐ de jiārén zhēn duō!",kr:"가족이 정말 많네요!"}
+]},
+{ title:"시간 (1)", words:[
+  {h:"今天",p:"jīntiān",m:"오늘",ec:"今天天气很好。",ep:"Jīntiān tiānqì hěn hǎo.",ek:"오늘 날씨가 좋아요."},
+  {h:"明天",p:"míngtiān",m:"내일",ec:"明天我要上班。",ep:"Míngtiān wǒ yào shàngbān.",ek:"내일 저는 출근해야 해요."},
+  {h:"昨天",p:"zuótiān",m:"어제",ec:"昨天我很忙。",ep:"Zuótiān wǒ hěn máng.",ek:"어제 저는 바빴어요."},
+  {h:"现在",p:"xiànzài",m:"지금",ec:"现在几点了？",ep:"Xiànzài jǐ diǎn le?",ek:"지금 몇 시예요?"},
+  {h:"时间",p:"shíjiān",m:"시간",ec:"我没有时间。",ep:"Wǒ méiyǒu shíjiān.",ek:"저는 시간이 없어요."}
+], dialogue:[
+  {s:"A",cn:"你现在有时间吗？",py:"Nǐ xiànzài yǒu shíjiān ma?",kr:"지금 시간 있어요?"},
+  {s:"B",cn:"今天没有，明天怎么样？",py:"Jīntiān méiyǒu, míngtiān zěnmeyàng?",kr:"오늘은 없어요, 내일 어때요?"},
+  {s:"A",cn:"好，昨天你也很忙吧？",py:"Hǎo, zuótiān nǐ yě hěn máng ba?",kr:"좋아요, 어제도 많이 바쁘셨죠?"},
+  {s:"B",cn:"是啊，明天见！",py:"Shì a, míngtiān jiàn!",kr:"네 맞아요, 내일 봐요!"}
+]},
+{ title:"시간 (2)", words:[
+  {h:"小时",p:"xiǎoshí",m:"시간(단위)",ec:"我等了两个小时。",ep:"Wǒ děng le liǎng ge xiǎoshí.",ek:"저는 두 시간 기다렸어요."},
+  {h:"分钟",p:"fēnzhōng",m:"분",ec:"请等五分钟。",ep:"Qǐng děng wǔ fēnzhōng.",ek:"5분만 기다려 주세요."},
+  {h:"星期",p:"xīngqī",m:"요일/주",ec:"今天星期几？",ep:"Jīntiān xīngqī jǐ?",ek:"오늘 무슨 요일이에요?"},
+  {h:"月",p:"yuè",m:"월/달",ec:"下个月我要去中国。",ep:"Xià ge yuè wǒ yào qù Zhōngguó.",ek:"다음 달에 저는 중국에 갈 거예요."},
+  {h:"年",p:"nián",m:"년/해",ec:"我在中国住了一年。",ep:"Wǒ zài Zhōngguó zhù le yì nián.",ek:"저는 중국에서 1년 살았어요."}
+], dialogue:[
+  {s:"A",cn:"你在中国住了几年？",py:"Nǐ zài Zhōngguó zhù le jǐ nián?",kr:"중국에서 몇 년 사셨어요?"},
+  {s:"B",cn:"一年了，这个月要回国。",py:"Yì nián le, zhège yuè yào huíguó.",kr:"1년 됐어요, 이번 달에 귀국해요."},
+  {s:"A",cn:"飞机要飞几个小时？",py:"Fēijī yào fēi jǐ ge xiǎoshí?",kr:"비행기가 몇 시간 걸려요?"},
+  {s:"B",cn:"两个小时，下星期我给你打电话。",py:"Liǎng ge xiǎoshí, xià xīngqī wǒ gěi nǐ dǎ diànhuà.",kr:"두 시간이요, 다음 주에 전화할게요."},
+  {s:"A",cn:"好，请等我五分钟。",py:"Hǎo, qǐng děng wǒ wǔ fēnzhōng.",kr:"네, 5분만 기다려주세요."}
+]},
+{ title:"음식 (1)", words:[
+  {h:"吃饭",p:"chīfàn",m:"밥을 먹다",ec:"我们一起吃饭吧。",ep:"Wǒmen yìqǐ chīfàn ba.",ek:"우리 같이 밥 먹어요."},
+  {h:"喝水",p:"hē shuǐ",m:"물을 마시다",ec:"请多喝水。",ep:"Qǐng duō hē shuǐ.",ek:"물을 많이 마시세요."},
+  {h:"米饭",p:"mǐfàn",m:"쌀밥",ec:"我喜欢吃米饭。",ep:"Wǒ xǐhuan chī mǐfàn.",ek:"저는 쌀밥 먹는 것을 좋아해요."},
+  {h:"面条",p:"miàntiáo",m:"국수",ec:"这个面条很好吃。",ep:"Zhège miàntiáo hěn hǎochī.",ek:"이 국수는 맛있어요."},
+  {h:"鸡蛋",p:"jīdàn",m:"계란",ec:"早上我吃了一个鸡蛋。",ep:"Zǎoshang wǒ chī le yí ge jīdàn.",ek:"아침에 계란 하나를 먹었어요."}
+], dialogue:[
+  {s:"A",cn:"你吃饭了吗？",py:"Nǐ chīfàn le ma?",kr:"밥 먹었어요?"},
+  {s:"B",cn:"还没有，我想吃面条。",py:"Hái méiyǒu, wǒ xiǎng chī miàntiáo.",kr:"아직이요, 국수 먹고 싶어요."},
+  {s:"A",cn:"我要米饭和鸡蛋。",py:"Wǒ yào mǐfàn hé jīdàn.",kr:"저는 밥이랑 계란 먹을래요."},
+  {s:"B",cn:"好的，多喝水，对身体好。",py:"Hǎo de, duō hē shuǐ, duì shēntǐ hǎo.",kr:"네, 물 많이 마셔요, 몸에 좋아요."}
+]},
+{ title:"음식 (2)", words:[
+  {h:"水果",p:"shuǐguǒ",m:"과일",ec:"我每天吃水果。",ep:"Wǒ měitiān chī shuǐguǒ.",ek:"저는 매일 과일을 먹어요."},
+  {h:"苹果",p:"píngguǒ",m:"사과",ec:"这个苹果很甜。",ep:"Zhège píngguǒ hěn tián.",ek:"이 사과는 달아요."},
+  {h:"咖啡",p:"kāfēi",m:"커피",ec:"我想喝咖啡。",ep:"Wǒ xiǎng hē kāfēi.",ek:"저는 커피를 마시고 싶어요."},
+  {h:"茶",p:"chá",m:"차",ec:"中国人喜欢喝茶。",ep:"Zhōngguórén xǐhuan hē chá.",ek:"중국인들은 차 마시는 것을 좋아해요."},
+  {h:"好吃",p:"hǎochī",m:"맛있다",ec:"这个菜真好吃。",ep:"Zhège cài zhēn hǎochī.",ek:"이 요리는 정말 맛있어요."}
+], dialogue:[
+  {s:"A",cn:"你想喝咖啡还是茶？",py:"Nǐ xiǎng hē kāfēi háishi chá?",kr:"커피 마실래요 차 마실래요?"},
+  {s:"B",cn:"我要茶，谢谢。这个苹果好吃吗？",py:"Wǒ yào chá, xièxie. Zhège píngguǒ hǎochī ma?",kr:"차로 할게요, 감사해요. 이 사과 맛있어요?"},
+  {s:"A",cn:"很好吃，多吃点儿水果吧。",py:"Hěn hǎochī, duō chī diǎnr shuǐguǒ ba.",kr:"맛있어요, 과일 많이 드세요."}
+]},
+{ title:"쇼핑 (1)", words:[
+  {h:"买",p:"mǎi",m:"사다",ec:"我想买一件衣服。",ep:"Wǒ xiǎng mǎi yí jiàn yīfu.",ek:"저는 옷 한 벌을 사고 싶어요."},
+  {h:"卖",p:"mài",m:"팔다",ec:"这里卖水果。",ep:"Zhèlǐ mài shuǐguǒ.",ek:"여기서 과일을 팔아요."},
+  {h:"多少钱",p:"duōshao qián",m:"얼마예요",ec:"这个多少钱？",ep:"Zhège duōshao qián?",ek:"이거 얼마예요?"},
+  {h:"便宜",p:"piányi",m:"싸다",ec:"这个很便宜。",ep:"Zhège hěn piányi.",ek:"이것은 싸요."},
+  {h:"贵",p:"guì",m:"비싸다",ec:"那个太贵了。",ep:"Nàge tài guì le.",ek:"저건 너무 비싸요."}
+], dialogue:[
+  {s:"A",cn:"这个多少钱？",py:"Zhège duōshao qián?",kr:"이거 얼마예요?"},
+  {s:"B",cn:"三十块，很便宜。",py:"Sānshí kuài, hěn piányi.",kr:"30위안이에요, 싸요."},
+  {s:"A",cn:"那个太贵了，我不买了。",py:"Nàge tài guì le, wǒ bù mǎi le.",kr:"저건 너무 비싸요, 안 살래요."},
+  {s:"B",cn:"这里也卖别的东西，你看看吧。",py:"Zhèlǐ yě mài biéde dōngxi, nǐ kànkan ba.",kr:"여기서 다른 물건도 팔아요, 한번 보세요."}
+]},
+{ title:"쇼핑 (2)", words:[
+  {h:"商店",p:"shāngdiàn",m:"상점",ec:"附近有商店吗？",ep:"Fùjìn yǒu shāngdiàn ma?",ek:"근처에 상점이 있어요?"},
+  {h:"衣服",p:"yīfu",m:"옷",ec:"这件衣服很漂亮。",ep:"Zhè jiàn yīfu hěn piàoliang.",ek:"이 옷은 예뻐요."},
+  {h:"鞋",p:"xié",m:"신발",ec:"我想买一双鞋。",ep:"Wǒ xiǎng mǎi yì shuāng xié.",ek:"저는 신발 한 켤레를 사고 싶어요."},
+  {h:"大小",p:"dàxiǎo",m:"크기",ec:"这个大小正合适。",ep:"Zhège dàxiǎo zhèng héshì.",ek:"이 크기가 딱 맞아요."},
+  {h:"颜色",p:"yánsè",m:"색깔",ec:"你喜欢什么颜色？",ep:"Nǐ xǐhuan shénme yánsè?",ek:"어떤 색깔을 좋아해요?"}
+], dialogue:[
+  {s:"A",cn:"这家商店有很多衣服。",py:"Zhè jiā shāngdiàn yǒu hěn duō yīfu.",kr:"이 가게에 옷이 많네요."},
+  {s:"B",cn:"我想买一双鞋，这个颜色怎么样？",py:"Wǒ xiǎng mǎi yì shuāng xié, zhège yánsè zěnmeyàng?",kr:"저 신발 한 켤레 사고 싶은데, 이 색깔 어때요?"},
+  {s:"A",cn:"很好看，大小合适吗？",py:"Hěn hǎokàn, dàxiǎo héshì ma?",kr:"예쁘네요, 사이즈는 맞아요?"},
+  {s:"B",cn:"合适，我就买这个。",py:"Héshì, wǒ jiù mǎi zhège.",kr:"맞아요, 이걸로 살게요."}
+]},
+{ title:"교통 (1)", words:[
+  {h:"公共汽车",p:"gōnggòng qìchē",m:"버스",ec:"我坐公共汽车上班。",ep:"Wǒ zuò gōnggòng qìchē shàngbān.",ek:"저는 버스를 타고 출근해요."},
+  {h:"出租车",p:"chūzūchē",m:"택시",ec:"我们打出租车吧。",ep:"Wǒmen dǎ chūzūchē ba.",ek:"우리 택시 타요."},
+  {h:"地铁",p:"dìtiě",m:"지하철",ec:"地铁站在哪儿？",ep:"Dìtiě zhàn zài nǎr?",ek:"지하철역이 어디예요?"},
+  {h:"火车",p:"huǒchē",m:"기차",ec:"我要坐火车去上海。",ep:"Wǒ yào zuò huǒchē qù Shànghǎi.",ek:"저는 기차를 타고 상하이에 갈 거예요."},
+  {h:"飞机",p:"fēijī",m:"비행기",ec:"飞机几点起飞？",ep:"Fēijī jǐ diǎn qǐfēi?",ek:"비행기가 몇 시에 이륙해요?"}
+], dialogue:[
+  {s:"A",cn:"你怎么去机场，坐地铁吗？",py:"Nǐ zěnme qù jīchǎng, zuò dìtiě ma?",kr:"공항에 어떻게 가요, 지하철 타요?"},
+  {s:"B",cn:"不，我坐出租车，比公共汽车快。",py:"Bù, wǒ zuò chūzūchē, bǐ gōnggòng qìchē kuài.",kr:"아니요, 택시 타요, 버스보다 빨라요."},
+  {s:"A",cn:"飞机几点起飞？",py:"Fēijī jǐ diǎn qǐfēi?",kr:"비행기가 몇 시에 출발해요?"},
+  {s:"B",cn:"下午三点，可惜没有火车。",py:"Xiàwǔ sān diǎn, kěxī méiyǒu huǒchē.",kr:"오후 3시요, 아쉽게도 기차는 없어요."}
+]},
+{ title:"교통 (2)", words:[
+  {h:"走",p:"zǒu",m:"걷다/가다",ec:"我们走路去吧。",ep:"Wǒmen zǒulù qù ba.",ek:"우리 걸어서 가요."},
+  {h:"开车",p:"kāichē",m:"운전하다",ec:"你会开车吗？",ep:"Nǐ huì kāichē ma?",ek:"운전할 줄 아세요?"},
+  {h:"骑自行车",p:"qí zìxíngchē",m:"자전거를 타다",ec:"我每天骑自行车上班。",ep:"Wǒ měitiān qí zìxíngchē shàngbān.",ek:"저는 매일 자전거를 타고 출근해요."},
+  {h:"远",p:"yuǎn",m:"멀다",ec:"学校离这儿很远。",ep:"Xuéxiào lí zhèr hěn yuǎn.",ek:"학교는 여기서 멀어요."},
+  {h:"近",p:"jìn",m:"가깝다",ec:"超市离我家很近。",ep:"Chāoshì lí wǒ jiā hěn jìn.",ek:"마트는 우리 집에서 가까워요."}
+], dialogue:[
+  {s:"A",cn:"学校离你家远吗？",py:"Xuéxiào lí nǐ jiā yuǎn ma?",kr:"학교가 집에서 멀어요?"},
+  {s:"B",cn:"不远，很近，我骑自行车去。",py:"Bù yuǎn, hěn jìn, wǒ qí zìxíngchē qù.",kr:"안 멀어요, 가까워요, 저는 자전거 타고 가요."},
+  {s:"A",cn:"你会开车吗？",py:"Nǐ huì kāichē ma?",kr:"운전할 줄 알아요?"},
+  {s:"B",cn:"会，不过今天我想走路去。",py:"Huì, búguò jīntiān wǒ xiǎng zǒulù qù.",kr:"할 줄 알아요, 근데 오늘은 걸어가고 싶어요."}
+]},
+{ title:"날씨와 계절 (1)", words:[
+  {h:"天气",p:"tiānqì",m:"날씨",ec:"今天天气怎么样？",ep:"Jīntiān tiānqì zěnmeyàng?",ek:"오늘 날씨 어때요?"},
+  {h:"晴天",p:"qíngtiān",m:"맑은 날",ec:"明天是晴天。",ep:"Míngtiān shì qíngtiān.",ek:"내일은 맑은 날이에요."},
+  {h:"下雨",p:"xiàyǔ",m:"비가 오다",ec:"外面在下雨。",ep:"Wàimiàn zài xiàyǔ.",ek:"밖에 비가 오고 있어요."},
+  {h:"下雪",p:"xiàxuě",m:"눈이 오다",ec:"冬天常常下雪。",ep:"Dōngtiān chángcháng xiàxuě.",ek:"겨울에는 자주 눈이 와요."},
+  {h:"热",p:"rè",m:"덥다",ec:"夏天很热。",ep:"Xiàtiān hěn rè.",ek:"여름은 더워요."}
+], dialogue:[
+  {s:"A",cn:"今天天气怎么样？",py:"Jīntiān tiānqì zěnmeyàng?",kr:"오늘 날씨 어때요?"},
+  {s:"B",cn:"今天是晴天，不过很热。",py:"Jīntiān shì qíngtiān, búguò hěn rè.",kr:"오늘은 맑은데, 더워요."},
+  {s:"A",cn:"明天会下雨吗？",py:"Míngtiān huì xiàyǔ ma?",kr:"내일 비 올까요?"},
+  {s:"B",cn:"听说明天下雪。",py:"Tīngshuō míngtiān xiàxuě.",kr:"내일 눈 온대요."}
+]},
+{ title:"날씨와 계절 (2)", words:[
+  {h:"冷",p:"lěng",m:"춥다",ec:"今天很冷。",ep:"Jīntiān hěn lěng.",ek:"오늘은 추워요."},
+  {h:"春天",p:"chūntiān",m:"봄",ec:"春天很暖和。",ep:"Chūntiān hěn nuǎnhuo.",ek:"봄은 따뜻해요."},
+  {h:"夏天",p:"xiàtiān",m:"여름",ec:"夏天我喜欢游泳。",ep:"Xiàtiān wǒ xǐhuan yóuyǒng.",ek:"여름에 저는 수영을 좋아해요."},
+  {h:"秋天",p:"qiūtiān",m:"가을",ec:"秋天的天气很凉快。",ep:"Qiūtiān de tiānqì hěn liángkuai.",ek:"가을 날씨는 시원해요."},
+  {h:"冬天",p:"dōngtiān",m:"겨울",ec:"冬天我不太喜欢出门。",ep:"Dōngtiān wǒ bú tài xǐhuan chūmén.",ek:"겨울에 저는 외출을 별로 안 좋아해요."}
+], dialogue:[
+  {s:"A",cn:"你最喜欢哪个季节？",py:"Nǐ zuì xǐhuan nǎge jìjié?",kr:"어느 계절을 제일 좋아해요?"},
+  {s:"B",cn:"我喜欢秋天，不冷也不热。",py:"Wǒ xǐhuan qiūtiān, bù lěng yě bú rè.",kr:"저는 가을이 좋아요, 춥지도 덥지도 않아요."},
+  {s:"A",cn:"夏天呢？",py:"Xiàtiān ne?",kr:"여름은요?"},
+  {s:"B",cn:"夏天太热了，冬天太冷了，春天最舒服。",py:"Xiàtiān tài rè le, dōngtiān tài lěng le, chūntiān zuì shūfu.",kr:"여름은 너무 덥고, 겨울은 너무 추워요, 봄이 제일 편해요."}
+]},
+{ title:"학교와 직장 (1)", words:[
+  {h:"学校",p:"xuéxiào",m:"학교",ec:"我的学校很大。",ep:"Wǒ de xuéxiào hěn dà.",ek:"우리 학교는 커요."},
+  {h:"老师",p:"lǎoshī",m:"선생님",ec:"老师教我们汉语。",ep:"Lǎoshī jiāo wǒmen Hànyǔ.",ek:"선생님이 우리에게 중국어를 가르쳐 주세요."},
+  {h:"学生",p:"xuésheng",m:"학생",ec:"我是一名学生。",ep:"Wǒ shì yì míng xuésheng.",ek:"저는 학생입니다."},
+  {h:"上班",p:"shàngbān",m:"출근하다",ec:"我每天九点上班。",ep:"Wǒ měitiān jiǔ diǎn shàngbān.",ek:"저는 매일 9시에 출근해요."},
+  {h:"工作",p:"gōngzuò",m:"일/일하다",ec:"你的工作忙不忙？",ep:"Nǐ de gōngzuò máng bu máng?",ek:"일이 바빠요?"}
+], dialogue:[
+  {s:"A",cn:"你还是学生吗？",py:"Nǐ hái shì xuésheng ma?",kr:"아직 학생이에요?"},
+  {s:"B",cn:"不是了，我已经工作了。",py:"Bú shì le, wǒ yǐjīng gōngzuò le.",kr:"아니요, 이제 일해요."},
+  {s:"A",cn:"你几点上班？",py:"Nǐ jǐ diǎn shàngbān?",kr:"몇 시에 출근해요?"},
+  {s:"B",cn:"九点，我以前的老师就在这个学校教书。",py:"Jiǔ diǎn, wǒ yǐqián de lǎoshī jiù zài zhège xuéxiào jiāoshū.",kr:"9시요, 제 예전 선생님이 이 학교에서 가르치세요."}
+]},
+{ title:"학교와 직장 (2)", words:[
+  {h:"公司",p:"gōngsī",m:"회사",ec:"我在一家公司工作。",ep:"Wǒ zài yì jiā gōngsī gōngzuò.",ek:"저는 한 회사에서 일해요."},
+  {h:"同事",p:"tóngshì",m:"동료",ec:"他是我的同事。",ep:"Tā shì wǒ de tóngshì.",ek:"그는 제 동료예요."},
+  {h:"会议",p:"huìyì",m:"회의",ec:"下午有一个会议。",ep:"Xiàwǔ yǒu yí ge huìyì.",ek:"오후에 회의가 있어요."},
+  {h:"忙",p:"máng",m:"바쁘다",ec:"最近工作很忙。",ep:"Zuìjìn gōngzuò hěn máng.",ek:"요즘 일이 바빠요."},
+  {h:"休息",p:"xiūxi",m:"쉬다",ec:"我们休息一下吧。",ep:"Wǒmen xiūxi yíxià ba.",ek:"우리 좀 쉬어요."}
+], dialogue:[
+  {s:"A",cn:"你的公司忙不忙？",py:"Nǐ de gōngsī máng bu máng?",kr:"회사가 바빠요?"},
+  {s:"B",cn:"很忙，今天下午还有一个会议。",py:"Hěn máng, jīntiān xiàwǔ hái yǒu yí ge huìyì.",kr:"바빠요, 오늘 오후에 회의도 있어요."},
+  {s:"A",cn:"你的同事呢？",py:"Nǐ de tóngshì ne?",kr:"동료들은요?"},
+  {s:"B",cn:"他们也很忙，我们都没时间休息。",py:"Tāmen yě hěn máng, wǒmen dōu méi shíjiān xiūxi.",kr:"그들도 바빠요, 우리 다 쉴 시간이 없어요."}
+]},
+{ title:"감정과 상태 (1)", words:[
+  {h:"高兴",p:"gāoxìng",m:"기쁘다",ec:"认识你很高兴。",ep:"Rènshi nǐ hěn gāoxìng.",ek:"만나서 반가워요."},
+  {h:"生气",p:"shēngqì",m:"화나다",ec:"他好像生气了。",ep:"Tā hǎoxiàng shēngqì le.",ek:"그는 화난 것 같아요."},
+  {h:"难过",p:"nánguò",m:"슬프다",ec:"听到这个消息我很难过。",ep:"Tīngdào zhège xiāoxi wǒ hěn nánguò.",ek:"이 소식을 듣고 저는 슬퍼요."},
+  {h:"累",p:"lèi",m:"피곤하다",ec:"今天工作了一天，我很累。",ep:"Jīntiān gōngzuò le yì tiān, wǒ hěn lèi.",ek:"오늘 하루 종일 일해서 피곤해요."},
+  {h:"饿",p:"è",m:"배고프다",ec:"我有点儿饿了。",ep:"Wǒ yǒudiǎnr è le.",ek:"저 좀 배고파요."}
+], dialogue:[
+  {s:"A",cn:"你怎么了？看起来很难过。",py:"Nǐ zěnme le? Kàn qǐlai hěn nánguò.",kr:"왜 그래요? 슬퍼 보여요."},
+  {s:"B",cn:"老板生气了，我很累，也有点儿饿。",py:"Lǎobǎn shēngqì le, wǒ hěn lèi, yě yǒudiǎnr è.",kr:"사장님이 화나셨어요, 저는 피곤하고 배도 좀 고파요."},
+  {s:"A",cn:"别难过了，我们去吃饭吧，你会高兴的。",py:"Bié nánguò le, wǒmen qù chīfàn ba, nǐ huì gāoxìng de.",kr:"슬퍼하지 마세요, 우리 밥 먹으러 가요, 기분 좋아질 거예요."}
+]},
+{ title:"감정과 상태 (2)", words:[
+  {h:"渴",p:"kě",m:"목마르다",ec:"我很渴，想喝水。",ep:"Wǒ hěn kě, xiǎng hē shuǐ.",ek:"저 목말라요, 물 마시고 싶어요."},
+  {h:"害怕",p:"hàipà",m:"무섭다",ec:"我有点儿害怕。",ep:"Wǒ yǒudiǎnr hàipà.",ek:"저 좀 무서워요."},
+  {h:"担心",p:"dānxīn",m:"걱정하다",ec:"别担心，没事的。",ep:"Bié dānxīn, méishì de.",ek:"걱정하지 마세요, 괜찮아요."},
+  {h:"放心",p:"fàngxīn",m:"안심하다",ec:"你放心吧。",ep:"Nǐ fàngxīn ba.",ek:"안심하세요."},
+  {h:"舒服",p:"shūfu",m:"편안하다",ec:"这个椅子坐起来很舒服。",ep:"Zhège yǐzi zuò qǐlai hěn shūfu.",ek:"이 의자는 앉으면 편안해요."}
+], dialogue:[
+  {s:"A",cn:"你看起来不太舒服。",py:"Nǐ kàn qǐlai bú tài shūfu.",kr:"컨디션이 안 좋아 보여요."},
+  {s:"B",cn:"我有点儿渴，也有点儿害怕明天的考试。",py:"Wǒ yǒudiǎnr kě, yě yǒudiǎnr hàipà míngtiān de kǎoshì.",kr:"좀 목마르고, 내일 시험이 좀 무서워요."},
+  {s:"A",cn:"别担心，你放心吧，你一定没问题。",py:"Bié dānxīn, nǐ fàngxīn ba, nǐ yídìng méi wèntí.",kr:"걱정하지 마세요, 안심하세요, 분명 괜찮을 거예요."}
+]},
+{ title:"취미와 여가 (1)", words:[
+  {h:"看书",p:"kàn shū",m:"책을 보다",ec:"我喜欢看书。",ep:"Wǒ xǐhuan kàn shū.",ek:"저는 책 보는 것을 좋아해요."},
+  {h:"听音乐",p:"tīng yīnyuè",m:"음악을 듣다",ec:"我每天听音乐。",ep:"Wǒ měitiān tīng yīnyuè.",ek:"저는 매일 음악을 들어요."},
+  {h:"看电视",p:"kàn diànshì",m:"TV를 보다",ec:"晚上我看电视。",ep:"Wǎnshang wǒ kàn diànshì.",ek:"저녁에 저는 TV를 봐요."},
+  {h:"运动",p:"yùndòng",m:"운동하다",ec:"我每天运动一个小时。",ep:"Wǒ měitiān yùndòng yí ge xiǎoshí.",ek:"저는 매일 한 시간 운동해요."},
+  {h:"旅游",p:"lǚyóu",m:"여행하다",ec:"我很喜欢旅游。",ep:"Wǒ hěn xǐhuan lǚyóu.",ek:"저는 여행을 아주 좋아해요."}
+], dialogue:[
+  {s:"A",cn:"你周末喜欢做什么？",py:"Nǐ zhōumò xǐhuan zuò shénme?",kr:"주말에 뭐 하는 거 좋아해요?"},
+  {s:"B",cn:"我喜欢看书，也喜欢听音乐。",py:"Wǒ xǐhuan kàn shū, yě xǐhuan tīng yīnyuè.",kr:"저는 책 읽는 것도 좋아하고, 음악 듣는 것도 좋아해요."},
+  {s:"A",cn:"不看电视吗？",py:"Bú kàn diànshì ma?",kr:"TV는 안 봐요?"},
+  {s:"B",cn:"很少，我更喜欢运动和旅游。",py:"Hěn shǎo, wǒ gèng xǐhuan yùndòng hé lǚyóu.",kr:"거의 안 봐요, 저는 운동이랑 여행을 더 좋아해요."}
+]},
+{ title:"취미와 여가 (2)", words:[
+  {h:"照相",p:"zhàoxiàng",m:"사진 찍다",ec:"我们照张相吧。",ep:"Wǒmen zhào zhāng xiàng ba.",ek:"우리 사진 한 장 찍어요."},
+  {h:"唱歌",p:"chànggē",m:"노래를 부르다",ec:"她唱歌唱得很好。",ep:"Tā chànggē chàng de hěn hǎo.",ek:"그녀는 노래를 잘 불러요."},
+  {h:"跳舞",p:"tiàowǔ",m:"춤을 추다",ec:"我不会跳舞。",ep:"Wǒ bú huì tiàowǔ.",ek:"저는 춤을 못 춰요."},
+  {h:"画画",p:"huà huà",m:"그림을 그리다",ec:"我妹妹很会画画。",ep:"Wǒ mèimei hěn huì huà huà.",ek:"제 여동생은 그림을 잘 그려요."},
+  {h:"玩游戏",p:"wán yóuxì",m:"게임을 하다",ec:"我周末喜欢玩游戏。",ep:"Wǒ zhōumò xǐhuan wán yóuxì.",ek:"저는 주말에 게임하는 것을 좋아해요."}
+], dialogue:[
+  {s:"A",cn:"旅游的时候你喜欢做什么？",py:"Lǚyóu de shíhou nǐ xǐhuan zuò shénme?",kr:"여행할 때 뭐 하는 거 좋아해요?"},
+  {s:"B",cn:"我喜欢照相，也喜欢画画。",py:"Wǒ xǐhuan zhàoxiàng, yě xǐhuan huà huà.",kr:"저는 사진 찍는 것도, 그림 그리는 것도 좋아해요."},
+  {s:"A",cn:"你会唱歌或者跳舞吗？",py:"Nǐ huì chànggē huòzhě tiàowǔ ma?",kr:"노래나 춤 할 줄 알아요?"},
+  {s:"B",cn:"不太会，晚上我更喜欢玩游戏。",py:"Bú tài huì, wǎnshang wǒ gèng xǐhuan wán yóuxì.",kr:"잘 못해요, 저녁엔 게임하는 걸 더 좋아해요."}
+]}
+];
+
+// ===================== 상태 =====================
+let progress = { completedDays: [], scores: {}, streak: 0, lastDate: null };
+let currentDay = 0;
+let wordIdx = 0;
+let flipped = false;
+let mode = 'learn'; // learn | dialogue | quiz | result
+let showTranslation = true;
+let quizQuestions = [];
+let quizIdx = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+const STORAGE_KEY = 'hsk-progress-v2';
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+// ===================== 음성(TTS) =====================
+let zhVoice = null;
+let voiceStatus = 'checking'; // checking | found | missing
+function pickVoice(){
+  if(!window.speechSynthesis) { voiceStatus='missing'; render(); return; }
+  const voices = window.speechSynthesis.getVoices();
+  if(!voices || voices.length===0) return; // 아직 로딩 전
+  zhVoice = voices.find(v=>v.lang==='zh-CN')
+    || voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('zh'))
+    || voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('cmn'))
+    || voices.find(v=>/chinese|mandarin|中文/i.test(v.name))
+    || null;
+  const prevStatus = voiceStatus;
+  voiceStatus = zhVoice ? 'found' : 'missing';
+  if(prevStatus !== voiceStatus) render();
+}
+if(window.speechSynthesis){
+  pickVoice();
+  window.speechSynthesis.onvoiceschanged = pickVoice;
+  setTimeout(pickVoice, 800); // 일부 브라우저는 voiceschanged가 늦게 뜨거나 안 뜸
+} else {
+  voiceStatus = 'missing';
+}
+function speak(text, rate){
+  if(!window.speechSynthesis){ return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = zhVoice ? zhVoice.lang : 'zh-CN';
+  if(zhVoice) u.voice = zhVoice;
+  u.rate = rate || 0.85;
+  window.speechSynthesis.speak(u);
+}
+function speakSequence(texts, rate){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  texts.forEach(t=>{
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = zhVoice ? zhVoice.lang : 'zh-CN';
+    if(zhVoice) u.voice = zhVoice;
+    u.rate = rate || 0.85;
+    window.speechSynthesis.speak(u);
+  });
+}
+
+async function loadProgress(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY);
+    if(res && res.value){ progress = JSON.parse(res.value); }
+  }catch(e){ /* 첫 사용: 기본값 유지 */ }
+  updateStreak();
+  render();
+}
+
+function updateStreak(){
+  const t = todayStr();
+  if(progress.lastDate === t) return;
+  if(!progress.lastDate){ return; }
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(progress.lastDate !== yesterday){ progress.streak = 0; }
+}
+
+async function saveProgress(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(progress)); }
+  catch(e){ console.error('저장 실패', e); }
+}
+
+function markDayComplete(dayIdx, score){
+  const t = todayStr();
+  if(!progress.completedDays.includes(dayIdx)){ progress.completedDays.push(dayIdx); }
+  progress.scores[dayIdx] = score;
+  if(progress.lastDate !== t){
+    progress.streak = (progress.lastDate === new Date(Date.now()-86400000).toISOString().slice(0,10)) ? progress.streak+1 : 1;
+    progress.lastDate = t;
+  }
+  saveProgress();
+}
+
+function isUnlocked(i){
+  return i===0 || progress.completedDays.includes(i-1) || progress.completedDays.includes(i);
+}
+
+// ===================== 렌더링 =====================
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    ${renderHeader()}
+    ${renderVoiceNotice()}
+    ${renderRail()}
+    ${mode==='learn' ? renderLearn() : mode==='dialogue' ? renderDialogue() : mode==='quiz' ? renderQuiz() : renderResult()}
+    <footer>매일 5개씩, 대화로 완성 &middot; HSK 2~3급 생활 중국어</footer>
+  `;
+  attachEvents();
+}
+
+function renderVoiceNotice(){
+  if(voiceStatus !== 'missing') return '';
+  return `<div style="background:#F6DEDA;border:1px solid var(--seal);color:var(--seal-dark);font-size:12px;padding:10px 14px;border-radius:10px;margin-bottom:16px;line-height:1.5;">
+    ⚠️ 이 기기·브라우저에 설치된 중국어 음성을 찾지 못했어요. 그래서 발음이 병음과 다르게 들릴 수 있어요.
+    기기의 설정에서 '중국어(만다린) 텍스트 음성 변환' 언어팩을 추가하거나, PC의 Chrome 브라우저로 열어보시면 대부분 해결돼요.
+  </div>`;
+}
+
+function renderHeader(){
+  return `
+  <header>
+    <div class="brand">
+      <div class="brand-seal">汉</div>
+      <div>
+        <h1>화니와 함께, 매일 중국어 한 스푼</h1>
+        <p>HSK 2~3급 · 단어 5개 + 실전 대화</p>
+      </div>
+    </div>
+    <div class="streak-badge">
+      <div class="streak-num">${progress.streak}</div>
+      <div class="streak-label">연속 학습일</div>
+    </div>
+  </header>`;
+}
+
+function renderRail(){
+  const chips = DAYS.map((d,i)=>{
+    const unlocked = isUnlocked(i);
+    const done = progress.completedDays.includes(i);
+    const cls = ['day-chip'];
+    if(!unlocked) cls.push('locked');
+    if(i===currentDay) cls.push('active');
+    if(done) cls.push('done');
+    return `<div class="${cls.join(' ')}" data-day="${i}" ${unlocked?'':'aria-disabled="true"'}>
+      ${done?'<div class="seal-mark">印</div>':''}
+      <div class="num">${i+1}</div>
+      <div class="tag">DAY</div>
+    </div>`;
+  }).join('');
+  return `<div class="rail-title">학습 일차 (20일 &middot; 하루 5단어)</div><div class="rail">${chips}</div>`;
+}
+
+function renderLearn(){
+  const day = DAYS[currentDay];
+  const w = day.words[wordIdx];
+  const dots = day.words.map((_,i)=>`<div class="dot ${i<=wordIdx?'on':''}"></div>`).join('');
+  const isLast = wordIdx === day.words.length-1;
+  const frontHtml = `
+      <div class="word-count">${wordIdx+1} / ${day.words.length}</div>
+      <div class="hanzi-row">
+        <div class="hanzi">${w.h}</div>
+        <button class="sound-btn" data-say="${encodeURIComponent(w.h)}" title="발음 듣기">🔊</button>
+      </div>
+      <div class="pinyin-lg">${w.p}</div>
+      <div class="hint">카드를 눌러 뜻 보기</div>
+  `;
+  const backHtml = `
+      <div class="word-count">${wordIdx+1} / ${day.words.length}</div>
+      <div class="meaning-lg">${w.m}</div>
+      <div class="example-box">
+        <div class="example-head">
+          <div class="example-cn">${w.ec}</div>
+          <button class="sound-btn small" data-say="${encodeURIComponent(w.ec)}" title="예문 듣기">🔊</button>
+        </div>
+        <div class="example-py">${w.ep}</div>
+        <div class="example-kr">${w.ek}</div>
+      </div>
+      <div class="hint">카드를 눌러 단어 보기</div>
+  `;
+  return `
+  <div class="section-label">DAY ${currentDay+1} &middot; ${day.title}</div>
+  <div class="dots">${dots}</div>
+  <div class="stage">
+    <div class="card" id="flashcard">
+      ${flipped ? backHtml : frontHtml}
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn ghost" id="prevBtn" ${wordIdx===0?'disabled':''}>이전</button>
+    ${isLast
+      ? `<button class="btn jade" id="dialogueBtn">대화로 복습하기 →</button>`
+      : `<button class="btn" id="nextBtn">다음 단어</button>`
+    }
+  </div>`;
+}
+
+function renderDialogue(){
+  const day = DAYS[currentDay];
+  const rows = day.dialogue.map(line=>{
+    const isB = line.s === 'B';
+    return `
+    <div class="bubble-row ${isB?'b':'a'}">
+      <div class="bubble">
+        <div class="bubble-head">
+          <div class="speaker">${line.s}</div>
+          <button class="sound-btn small" data-say="${encodeURIComponent(line.cn)}" title="문장 듣기">🔊</button>
+        </div>
+        <div class="cn">${line.cn}</div>
+        <div class="py ${showTranslation?'':'hidden'}">${line.py}</div>
+        <div class="kr ${showTranslation?'':'hidden'}">${line.kr}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="section-label">DAY ${currentDay+1} 대화 연습 &middot; ${day.title}</div>
+  <div class="dlg-wrap">
+    <div class="dlg-head">
+      <div class="dlg-title">오늘 배운 단어가 들어간 실전 대화예요</div>
+      <div style="display:flex; gap:8px;">
+        <button class="toggle-btn" id="playAllBtn">🔊 전체 듣기</button>
+        <button class="toggle-btn ${showTranslation?'on':''}" id="toggleTrans">${showTranslation?'병음·해석 숨기기':'병음·해석 보기'}</button>
+      </div>
+    </div>
+    ${rows}
+  </div>
+  <div class="controls">
+    <button class="btn ghost" id="backToLearnBtn">단어 다시 보기</button>
+    <button class="btn seal" id="quizStartBtn">퀴즈 풀기 →</button>
+  </div>`;
+}
+
+function buildQuiz(){
+  const words = DAYS[currentDay].words;
+  const pool = DAYS.flatMap(d=>d.words.map(w=>w.m));
+  quizQuestions = words.map(w=>{
+    const distractors = pool.filter(m=>m!==w.m).sort(()=>Math.random()-0.5).slice(0,3);
+    const options = [...distractors, w.m].sort(()=>Math.random()-0.5);
+    return { h:w.h, p:w.p, answer:w.m, options };
+  }).sort(()=>Math.random()-0.5);
+  quizIdx = 0; quizScore = 0; quizAnswered = false;
+  mode = 'quiz';
+}
+
+function renderQuiz(){
+  const q = quizQuestions[quizIdx];
+  const optsHtml = q.options.map(opt=>{
+    let cls = 'opt';
+    if(quizAnswered){
+      if(opt===q.answer) cls += ' correct';
+      else if(opt===q.selected) cls += ' wrong';
+      cls += ' disabled';
+    }
+    return `<div class="${cls}" data-opt="${encodeURIComponent(opt)}">${opt}</div>`;
+  }).join('');
+  return `
+  <div class="section-label">DAY ${currentDay+1} 퀴즈 &middot; ${DAYS[currentDay].title}</div>
+  <div class="quiz-progress">문제 ${quizIdx+1} / ${quizQuestions.length}</div>
+  <div class="q-card">
+    <div class="hanzi-row">
+      <div class="q-hanzi">${q.h}</div>
+      <button class="sound-btn" data-say="${encodeURIComponent(q.h)}" title="발음 듣기">🔊</button>
+    </div>
+    <div class="q-pinyin">${q.p}</div>
+    <div class="q-prompt">이 단어의 뜻으로 알맞은 것을 고르세요</div>
+  </div>
+  <div class="options">${optsHtml}</div>
+  ${quizAnswered ? `<div class="controls" style="margin-top:14px;"><button class="btn seal" id="quizNextBtn">${quizIdx===quizQuestions.length-1?'결과 보기':'다음 문제'}</button></div>` : ''}
+  `;
+}
+
+function renderResult(){
+  const total = quizQuestions.length;
+  const pct = Math.round((quizScore/total)*100);
+  const msg = pct===100 ? '완벽해요! 오늘의 단어와 대화를 모두 익혔어요.' : pct>=70 ? '좋아요! 대화문을 한 번 더 소리내어 읽어봐요.' : '단어와 대화를 다시 복습하고 재도전해봐요.';
+  const nextLocked = currentDay===DAYS.length-1;
+  return `
+  <div class="result-card">
+    <div style="font-size:13px;color:var(--ink-soft);">DAY ${currentDay+1} 결과</div>
+    <div class="result-score">${quizScore} / ${total}</div>
+    <div class="result-sub">${msg}</div>
+    <div class="controls">
+      <button class="btn ghost" id="retryBtn">다시 풀기</button>
+      ${nextLocked ? '' : `<button class="btn seal" id="nextDayBtn">다음 날로 →</button>`}
+    </div>
+  </div>`;
+}
+
+// ===================== 이벤트 =====================
+function attachEvents(){
+  document.querySelectorAll('.day-chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const i = parseInt(el.dataset.day);
+      if(!isUnlocked(i)) return;
+      currentDay = i; wordIdx = 0; flipped = false; mode = 'learn';
+      render();
+    });
+  });
+
+  const flashcard = document.getElementById('flashcard');
+  if(flashcard) flashcard.addEventListener('click', ()=>{ flipped = !flipped; render(); });
+
+  const prevBtn = document.getElementById('prevBtn');
+  if(prevBtn) prevBtn.addEventListener('click', (e)=>{ e.stopPropagation(); if(wordIdx>0){ wordIdx--; flipped=false; render(); } });
+
+  const nextBtn = document.getElementById('nextBtn');
+  if(nextBtn) nextBtn.addEventListener('click', (e)=>{ e.stopPropagation(); wordIdx++; flipped=false; render(); });
+
+  const dialogueBtn = document.getElementById('dialogueBtn');
+  if(dialogueBtn) dialogueBtn.addEventListener('click', (e)=>{ e.stopPropagation(); mode='dialogue'; render(); });
+
+  const backToLearnBtn = document.getElementById('backToLearnBtn');
+  if(backToLearnBtn) backToLearnBtn.addEventListener('click', ()=>{ mode='learn'; wordIdx=0; flipped=false; render(); });
+
+  const toggleTrans = document.getElementById('toggleTrans');
+  if(toggleTrans) toggleTrans.addEventListener('click', ()=>{ showTranslation = !showTranslation; render(); });
+
+  document.querySelectorAll('.sound-btn').forEach(el=>{
+    el.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const text = decodeURIComponent(el.dataset.say);
+      speak(text);
+    });
+  });
+
+  const playAllBtn = document.getElementById('playAllBtn');
+  if(playAllBtn) playAllBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const lines = DAYS[currentDay].dialogue.map(l=>l.cn);
+    speakSequence(lines);
+  });
+
+  const quizStartBtn = document.getElementById('quizStartBtn');
+  if(quizStartBtn) quizStartBtn.addEventListener('click', ()=>{ buildQuiz(); render(); });
+
+  document.querySelectorAll('.opt').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(quizAnswered) return;
+      const chosen = decodeURIComponent(el.dataset.opt);
+      const q = quizQuestions[quizIdx];
+      q.selected = chosen;
+      quizAnswered = true;
+      if(chosen===q.answer) quizScore++;
+      render();
+    });
+  });
+  const quizNextBtn = document.getElementById('quizNextBtn');
+  if(quizNextBtn) quizNextBtn.addEventListener('click', ()=>{
+    if(quizIdx < quizQuestions.length-1){ quizIdx++; quizAnswered=false; render(); }
+    else{ markDayComplete(currentDay, quizScore); mode = 'result'; render(); }
+  });
+  const retryBtn = document.getElementById('retryBtn');
+  if(retryBtn) retryBtn.addEventListener('click', ()=>{ buildQuiz(); render(); });
+  const nextDayBtn = document.getElementById('nextDayBtn');
+  if(nextDayBtn) nextDayBtn.addEventListener('click', ()=>{
+    currentDay = Math.min(currentDay+1, DAYS.length-1);
+    wordIdx = 0; flipped=false; mode='learn'; render();
+  });
+}
+
+loadProgress();
+</script>
+</body>
+</html>
